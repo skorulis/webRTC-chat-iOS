@@ -3,6 +3,7 @@ platform :ios, '7.0'
 
 pod "libjingle_peerconnection"
 pod 'Masonry'
+pod 'Mantle'
 pod 'FontAwesomeKit'
 pod 'UIViewController+KeyboardAnimation', '~> 1.2'
 pod 'SocketRocket'

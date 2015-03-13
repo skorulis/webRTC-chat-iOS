@@ -39,9 +39,16 @@
     _chatText.backgroundColor = [UIColor grayColor];
     
     _sendButton = [[UIButton alloc] init];
-    FAKIcon* icon = [FAKFontAwesome sendIconWithSize:30];
-    [_sendButton setAttributedTitle:icon.attributedString forState:UIControlStateNormal];
+    _sendButton.backgroundColor = [UIColor whiteColor];
+    FAKIcon* sendIcon = [FAKFontAwesome sendIconWithSize:30];
+    [_sendButton setAttributedTitle:sendIcon.attributedString forState:UIControlStateNormal];
     [_sendButton addTarget:self action:@selector(sendPressed:) forControlEvents:UIControlEventTouchUpInside];
+    
+    _connectButton = [[UIButton alloc] init];
+    FAKIcon* connectIcon = [FAKFontAwesome powerOffIconWithSize:30];
+    [connectIcon addAttributes:@{NSForegroundColorAttributeName : [UIColor redColor]}];
+    [_connectButton setAttributedTitle:connectIcon.attributedString forState:UIControlStateNormal];
+    [_connectButton addTarget:self action:@selector(connectPressed:) forControlEvents:UIControlEventTouchUpInside];
     
     _entryText = [[UITextView alloc] init];
     _entryText.editable = true;
@@ -50,6 +57,7 @@
     [self.view addSubview:_chatText];
     [self.view addSubview:_entryText];
     [self.view addSubview:_sendButton];
+    [self.view addSubview:_connectButton];
     
     [self buildLayout];
     [_service connectSocket];
@@ -89,15 +97,26 @@
         make.top.bottom.equalTo(_entryText);
         make.height.equalTo(_sendButton.mas_width);
     }];
+    
+    [_connectButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.right.equalTo(_sendButton);
+        make.bottom.equalTo(_chatText);
+    }];
 }
 
 #pragma mark RTCServiceDelegate
 
 - (void) rtcServiceDidConnectSocket:(RTCService*)rtcService {
     [self appendText:@"connected to server" name:@"System" color:[UIColor yellowColor]];
+    _connectButton.enabled = true;
 }
 
 #pragma mark actions
+
+- (void) connectPressed:(id)sender {
+    [self appendText:@"searching for user..." name:@"System" color:[UIColor yellowColor]];
+    [_service connectToPeer];
+}
 
 - (void) sendPressed:(id)sender {
     NSString* toSend = _entryText.text;

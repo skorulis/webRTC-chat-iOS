@@ -15,6 +15,7 @@
 		FA89223D1AB2479D0078D218 /* webRTCChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA89223C1AB2479D0078D218 /* webRTCChatTests.m */; };
 		FA8922481AB25EA80078D218 /* ChatWindowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA8922471AB25EA80078D218 /* ChatWindowViewController.m */; };
 		FA89224B1AB25ED10078D218 /* RTCService.m in Sources */ = {isa = PBXBuildFile; fileRef = FA89224A1AB25ED10078D218 /* RTCService.m */; };
+		FA89224F1AB268920078D218 /* ChatControlMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = FA89224E1AB268920078D218 /* ChatControlMessage.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,8 @@
 		FA8922471AB25EA80078D218 /* ChatWindowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatWindowViewController.m; sourceTree = "<group>"; };
 		FA8922491AB25ED10078D218 /* RTCService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTCService.h; sourceTree = "<group>"; };
 		FA89224A1AB25ED10078D218 /* RTCService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTCService.m; sourceTree = "<group>"; };
+		FA89224D1AB268920078D218 /* ChatControlMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatControlMessage.h; sourceTree = "<group>"; };
+		FA89224E1AB268920078D218 /* ChatControlMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatControlMessage.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +109,7 @@
 		FA89221F1AB2479C0078D218 /* webRTCChat */ = {
 			isa = PBXGroup;
 			children = (
+				FA89224C1AB2687E0078D218 /* model */,
 				FA8922241AB2479C0078D218 /* AppDelegate.h */,
 				FA8922251AB2479C0078D218 /* AppDelegate.m */,
 				FA89222D1AB2479D0078D218 /* Images.xcassets */,
@@ -143,6 +147,15 @@
 				FA89223B1AB2479D0078D218 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FA89224C1AB2687E0078D218 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				FA89224D1AB268920078D218 /* ChatControlMessage.h */,
+				FA89224E1AB268920078D218 /* ChatControlMessage.m */,
+			);
+			path = model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -280,6 +293,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA8922481AB25EA80078D218 /* ChatWindowViewController.m in Sources */,
+				FA89224F1AB268920078D218 /* ChatControlMessage.m in Sources */,
 				FA89224B1AB25ED10078D218 /* RTCService.m in Sources */,
 				FA8922261AB2479C0078D218 /* AppDelegate.m in Sources */,
 				FA8922231AB2479C0078D218 /* main.m in Sources */,

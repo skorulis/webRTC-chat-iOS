@@ -3,6 +3,7 @@
 
 #import "RTCService.h"
 #import <SocketRocket/SRWebSocket.h>
+#import "ChatControlMessage.h"
 
 static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
@@ -21,10 +22,46 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     [_webSocket open];
 }
 
+- (void) connectToPeer {
+    ChatControlMessage* message = [[ChatControlMessage alloc] init];
+    message.type = @"CCT_CHAT_REQUEST";
+    [self sendControlMessage:message];
+}
+
+- (void) disconnectFromPeer {
+    
+}
+
+- (void) sendControlMessage:(ChatControlMessage*)message {
+    NSDictionary* json = [MTLJSONAdapter JSONDictionaryFromModel:message];
+    NSError* error;
+    NSData* data = [NSJSONSerialization dataWithJSONObject:json options:0 error:&error];
+    if(error || !data) {
+        NSLog(@"Error sending control message %@",message);
+    } else {
+        [_webSocket send:data];
+    }
+}
+
 #pragma mark SRWebSocketDelegate
 
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message {
-    NSLog(@"Got message %@",message);
+    if([message isKindOfClass:[NSString class]]) {
+        message = [((NSString*)message) dataUsingEncoding:NSUTF8StringEncoding];
+    }
+    NSError* error;
+    NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:message options:0 error:&error];
+    if(!dic || error) {
+        NSLog(@"Error parsing JSON %@",error);
+        return;
+    }
+    ChatControlMessage* control = [MTLJSONAdapter modelOfClass:ChatControlMessage.class fromJSONDictionary:dic error:&error];
+    if(!control || error) {
+        NSLog(@"Error parsing dic %@",error);
+        return;
+    }
+    
+    NSLog(@"Got message %@",control);
 }
 
 - (void)webSocketDidOpen:(SRWebSocket *)webSocket {

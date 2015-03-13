@@ -16,5 +16,7 @@
 @property (nonatomic, weak) id<RTCServiceDelegate> delegate;
 
 - (void) connectSocket;
+- (void) connectToPeer;
+- (void) disconnectFromPeer;
 
 @end
