@@ -10,9 +10,14 @@ static NSString* const CCT_CHAT_ANSWER = @"CCT_CHAT_ANSWER";
 
 @interface ChatControlMessage : MTLModel <MTLJSONSerializing>
 
-@property (nonatomic, strong) NSString* type;
-@property (nonatomic, strong) id payload;
+@property (nonatomic, readonly) NSString* type;
+@property (nonatomic, readonly) NSString* payload;
+
+- (instancetype) initWithType:(NSString*)type payload:(MTLModel<MTLJSONSerializing>*)payload;
+
+- (id) payloadAs:(Class)c;
 
 - (BOOL) isInit;
+- (BOOL) isOffer;
 
 @end

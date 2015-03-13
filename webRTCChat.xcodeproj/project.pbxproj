@@ -16,6 +16,8 @@
 		FA8922481AB25EA80078D218 /* ChatWindowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA8922471AB25EA80078D218 /* ChatWindowViewController.m */; };
 		FA89224B1AB25ED10078D218 /* RTCService.m in Sources */ = {isa = PBXBuildFile; fileRef = FA89224A1AB25ED10078D218 /* RTCService.m */; };
 		FA89224F1AB268920078D218 /* ChatControlMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = FA89224E1AB268920078D218 /* ChatControlMessage.m */; };
+		FA8922521AB27BA20078D218 /* SDPModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FA8922511AB27BA20078D218 /* SDPModel.m */; };
+		FA8922551AB287B50078D218 /* ICECandidateModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FA8922541AB287B50078D218 /* ICECandidateModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,10 @@
 		FA89224A1AB25ED10078D218 /* RTCService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTCService.m; sourceTree = "<group>"; };
 		FA89224D1AB268920078D218 /* ChatControlMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatControlMessage.h; sourceTree = "<group>"; };
 		FA89224E1AB268920078D218 /* ChatControlMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatControlMessage.m; sourceTree = "<group>"; };
+		FA8922501AB27BA20078D218 /* SDPModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDPModel.h; sourceTree = "<group>"; };
+		FA8922511AB27BA20078D218 /* SDPModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDPModel.m; sourceTree = "<group>"; };
+		FA8922531AB287B50078D218 /* ICECandidateModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICECandidateModel.h; sourceTree = "<group>"; };
+		FA8922541AB287B50078D218 /* ICECandidateModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICECandidateModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +160,10 @@
 			children = (
 				FA89224D1AB268920078D218 /* ChatControlMessage.h */,
 				FA89224E1AB268920078D218 /* ChatControlMessage.m */,
+				FA8922501AB27BA20078D218 /* SDPModel.h */,
+				FA8922511AB27BA20078D218 /* SDPModel.m */,
+				FA8922531AB287B50078D218 /* ICECandidateModel.h */,
+				FA8922541AB287B50078D218 /* ICECandidateModel.m */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -293,8 +303,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA8922481AB25EA80078D218 /* ChatWindowViewController.m in Sources */,
+				FA8922521AB27BA20078D218 /* SDPModel.m in Sources */,
 				FA89224F1AB268920078D218 /* ChatControlMessage.m in Sources */,
 				FA89224B1AB25ED10078D218 /* RTCService.m in Sources */,
+				FA8922551AB287B50078D218 /* ICECandidateModel.m in Sources */,
 				FA8922261AB2479C0078D218 /* AppDelegate.m in Sources */,
 				FA8922231AB2479C0078D218 /* main.m in Sources */,
 			);

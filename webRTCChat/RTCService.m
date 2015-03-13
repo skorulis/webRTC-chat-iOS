@@ -12,16 +12,19 @@
 #import <RTCPeerConnection.h>
 #import <RTCICEServer.h>
 #import <RTCSessionDescriptionDelegate.h>
-#import <RTCSessionDescription.h>
+#import "SDPModel.h"
+#import "ICECandidateModel.h"
+
 
 static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
-@interface RTCService () <SRWebSocketDelegate, RTCPeerConnectionDelegate, RTCSessionDescriptionDelegate> {
+@interface RTCService () <SRWebSocketDelegate, RTCPeerConnectionDelegate, RTCSessionDescriptionDelegate, RTCDataChannelDelegate> {
     SRWebSocket* _webSocket;
     RTCPeerConnectionFactory* _factory;
     RTCPeerConnection* _peerConnection;
     RTCDataChannel* _dataChannel;
     NSArray* _stunServers;
+    BOOL _didInitiate;
 }
 
 @end
@@ -56,8 +59,7 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 }
 
 - (void) connectToPeer {
-    ChatControlMessage* message = [[ChatControlMessage alloc] init];
-    message.type = @"CCT_CHAT_REQUEST";
+    ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:CCT_CHAT_REQUEST payload:nil];
     [self sendControlMessage:message];
 }
 
@@ -110,7 +112,7 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
 // New Ice candidate have been found.
 - (void)peerConnection:(RTCPeerConnection *)peerConnection gotICECandidate:(RTCICECandidate *)candidate {
-    
+    NSLog(@"Got ice candidate %@",candidate);
 }
 
 // New data channel has been opened.
@@ -123,6 +125,11 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 // Called when creating a session.
 - (void)peerConnection:(RTCPeerConnection *)peerConnection didCreateSessionDescription:(RTCSessionDescription *)sdp error:(NSError *)error {
     NSLog(@"Did create session description %@",sdp);
+    [_peerConnection setLocalDescriptionWithDelegate:self sessionDescription:sdp];
+    SDPModel* sdpModel = [[SDPModel alloc] initWithSDP:sdp];
+    NSString* messageType = _didInitiate ? CCT_CHAT_OFFER : CCT_CHAT_ANSWER;
+    ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:messageType payload:sdpModel];
+    [self sendControlMessage:message];
 }
 
 // Called when setting a local or remote description.
@@ -130,6 +137,17 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     
 }
 
+#pragma mark RTCDataChannelDelegate
+
+// Called when the data channel state has changed.
+- (void)channelDidChangeState:(RTCDataChannel*)channel {
+    
+}
+
+// Called when a data buffer was successfully received.
+- (void)channel:(RTCDataChannel*)channel didReceiveMessageWithBuffer:(RTCDataBuffer*)buffer {
+    
+}
 
 #pragma mark SRWebSocketDelegate
 
@@ -151,6 +169,9 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     
     if(control.isInit) {
         [self handleInit];
+    } else if(control.isOffer) {
+        SDPModel* sdpModel = [control payloadAs:SDPModel.class];
+        [self handleOffer:sdpModel];
     }
     
     NSLog(@"Got message %@",control);
@@ -172,10 +193,17 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 #pragma mark private
 
 - (void) handleInit {
+    _didInitiate = true;
     RTCDataChannelInit* config = [[RTCDataChannelInit alloc] init];
     config.isOrdered = false;
     _dataChannel = [_peerConnection createDataChannelWithLabel:@"sender" config:config];
+    _dataChannel.delegate = self;
     [_peerConnection createOfferWithDelegate:self constraints:nil];
+}
+
+- (void) handleOffer:(SDPModel*)sdpModel {
+    [_peerConnection setRemoteDescriptionWithDelegate:self sessionDescription:sdpModel.sdp];
+    [_peerConnection createAnswerWithDelegate:self constraints:nil];
 }
 
 @end
