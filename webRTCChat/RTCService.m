@@ -67,6 +67,12 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     
 }
 
+- (void) sendText:(NSString *)text {
+    NSData* data = [text dataUsingEncoding:NSUTF8StringEncoding];
+    RTCDataBuffer* buffer = [[RTCDataBuffer alloc] initWithData:data isBinary:true];
+    [_dataChannel sendData:buffer];
+}
+
 - (void) sendControlMessage:(ChatControlMessage*)message {
     NSDictionary* json = [MTLJSONAdapter JSONDictionaryFromModel:message];
     NSError* error;
@@ -147,11 +153,21 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 // Called when the data channel state has changed.
 - (void)channelDidChangeState:(RTCDataChannel*)channel {
     NSLog(@"Data channel did change state %u",channel.state);
+    if(channel.state == kRTCDataChannelStateOpen) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_delegate rtcServiceDidConnectChannel:self];
+        });
+        
+    }
 }
 
 // Called when a data buffer was successfully received.
 - (void)channel:(RTCDataChannel*)channel didReceiveMessageWithBuffer:(RTCDataBuffer*)buffer {
     NSLog(@"Channel did receive message %@",buffer);
+    NSString* s = [[NSString alloc] initWithData:buffer.data encoding:NSUTF8StringEncoding];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_delegate rtcService:self didReceiveText:s];
+    });
 }
 
 #pragma mark SRWebSocketDelegate
@@ -177,6 +193,9 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     } else if(control.isOffer) {
         SDPModel* sdpModel = [control payloadAs:SDPModel.class];
         [self handleOffer:sdpModel];
+    } else if(control.isAnswer) {
+        SDPModel* sdpModel = [control payloadAs:SDPModel.class];
+        [self handleAnswer:sdpModel];
     } else if(control.isIceCandidate) {
         ICECandidateModel* ice = [control payloadAs:ICECandidateModel.class];
         [_peerConnection addICECandidate:ice.candidate];
@@ -212,6 +231,10 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 - (void) handleOffer:(SDPModel*)sdpModel {
     [_peerConnection setRemoteDescriptionWithDelegate:self sessionDescription:sdpModel.sdp];
     [_peerConnection createAnswerWithDelegate:self constraints:nil];
+}
+
+- (void) handleAnswer:(SDPModel*)sdpModel {
+    [_peerConnection setRemoteDescriptionWithDelegate:self sessionDescription:sdpModel.sdp];
 }
 
 @end

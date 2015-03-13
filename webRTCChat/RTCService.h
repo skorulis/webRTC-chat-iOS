@@ -8,6 +8,8 @@
 @protocol RTCServiceDelegate <NSObject>
 
 - (void) rtcServiceDidConnectSocket:(RTCService*)rtcService;
+- (void) rtcServiceDidConnectChannel:(RTCService*)rtcService;
+- (void) rtcService:(RTCService*)rtcService didReceiveText:(NSString*)text;
 
 @end
 
@@ -18,5 +20,7 @@
 - (void) connectSocket;
 - (void) connectToPeer;
 - (void) disconnectFromPeer;
+
+- (void) sendText:(NSString*)text;
 
 @end

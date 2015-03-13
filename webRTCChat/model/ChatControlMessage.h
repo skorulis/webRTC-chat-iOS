@@ -20,6 +20,7 @@ static NSString* const CCT_ICE_CANDIDATE = @"CCT_ICE_CANDIDATE";
 
 - (BOOL) isInit;
 - (BOOL) isOffer;
+- (BOOL) isAnswer;
 - (BOOL) isIceCandidate;
 
 @end

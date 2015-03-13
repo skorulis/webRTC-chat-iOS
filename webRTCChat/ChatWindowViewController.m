@@ -111,6 +111,14 @@
     _connectButton.enabled = true;
 }
 
+- (void) rtcServiceDidConnectChannel:(RTCService*)rtcService {
+    [self appendText:@"found user, chat away" name:@"System" color:[UIColor yellowColor]];
+}
+
+- (void) rtcService:(RTCService*)rtcService didReceiveText:(NSString*)text {
+    [self appendText:text name:@"Stranger" color:[UIColor purpleColor]];
+}
+
 #pragma mark actions
 
 - (void) connectPressed:(id)sender {
@@ -125,6 +133,7 @@
     }
     [self appendText:toSend name:@"You" color:[UIColor blueColor]];
     _entryText.text = nil;
+    [_service sendText:toSend];
 }
 
 - (void) appendText:(NSString*)text name:(NSString*)name color:(UIColor*)color {
@@ -132,5 +141,6 @@
     NSAttributedString* att = [[NSAttributedString alloc] initWithString:s attributes:@{NSForegroundColorAttributeName : color, NSFontAttributeName: [UIFont systemFontOfSize:18]}];
     [_text appendAttributedString:att];
     _chatText.attributedText = _text;
+    [_chatText scrollRangeToVisible:NSMakeRange(_text.length-2, 1)];
 }
 @end
