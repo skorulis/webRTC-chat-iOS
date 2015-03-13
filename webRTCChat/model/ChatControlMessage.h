@@ -13,4 +13,6 @@ static NSString* const CCT_CHAT_ANSWER = @"CCT_CHAT_ANSWER";
 @property (nonatomic, strong) NSString* type;
 @property (nonatomic, strong) id payload;
 
+- (BOOL) isInit;
+
 @end

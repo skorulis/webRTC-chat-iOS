@@ -4,11 +4,24 @@
 #import "RTCService.h"
 #import <SocketRocket/SRWebSocket.h>
 #import "ChatControlMessage.h"
+#import <RTCPeerConnectionFactory.h>
+#import <RTCMediaConstraints.h>
+#import <RTCPair.h>
+#import <RTCPeerConnectionDelegate.h>
+#import <RTCDataChannel.h>
+#import <RTCPeerConnection.h>
+#import <RTCICEServer.h>
+#import <RTCSessionDescriptionDelegate.h>
+#import <RTCSessionDescription.h>
 
 static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
-@interface RTCService () <SRWebSocketDelegate>{
+@interface RTCService () <SRWebSocketDelegate, RTCPeerConnectionDelegate, RTCSessionDescriptionDelegate> {
     SRWebSocket* _webSocket;
+    RTCPeerConnectionFactory* _factory;
+    RTCPeerConnection* _peerConnection;
+    RTCDataChannel* _dataChannel;
+    NSArray* _stunServers;
 }
 
 @end
@@ -16,10 +29,30 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 @implementation RTCService
 
 - (void) connectSocket {
+    NSMutableArray* stunServers = [[NSMutableArray alloc] init];;
+    NSArray* stunServerURLStrings = @[@"stun1.voiceeclipse.net",@"stun.l.google.com:19302",@"stun3.l.google.com:19302"];
+    for(NSString* s in stunServerURLStrings) {
+        NSURL* url = [NSURL URLWithString:s];
+        NSParameterAssert(url);
+        RTCICEServer* server = [[RTCICEServer alloc] initWithURI:url username:@"" password:@""];
+        NSParameterAssert(server);
+        [stunServers addObject:server];
+    }
+    
+    _stunServers = stunServers.copy;
+    [RTCPeerConnectionFactory initializeSSL];
+    _factory = [[RTCPeerConnectionFactory alloc] init];
     NSURLRequest* request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:kServerAddress]];
     _webSocket = [[SRWebSocket alloc] initWithURLRequest:request];
     _webSocket.delegate = self;
     [_webSocket open];
+    [self createPeerConnection];
+}
+
+- (void) createPeerConnection {
+    RTCPair* pair = [[RTCPair alloc] initWithKey:@"DtlsSrtpKeyAgreement" value:@"true"];
+    RTCMediaConstraints* constraints = [[RTCMediaConstraints alloc] initWithMandatoryConstraints:nil optionalConstraints:@[pair]];
+    _peerConnection = [_factory peerConnectionWithICEServers:_stunServers constraints:constraints delegate:self];
 }
 
 - (void) connectToPeer {
@@ -43,6 +76,61 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     }
 }
 
+#pragma mark RTCPeerConnectionDelegate
+
+// Triggered when the SignalingState changed.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection signalingStateChanged:(RTCSignalingState)stateChanged {
+    
+}
+
+// Triggered when media is received on a new stream from remote peer.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection addedStream:(RTCMediaStream *)stream {
+    
+}
+
+// Triggered when a remote peer close a stream.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection removedStream:(RTCMediaStream *)stream {
+    
+}
+
+// Triggered when renegotiation is needed, for example the ICE has restarted.
+- (void)peerConnectionOnRenegotiationNeeded:(RTCPeerConnection *)peerConnection {
+    
+}
+
+// Called any time the ICEConnectionState changes.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection iceConnectionChanged:(RTCICEConnectionState)newState {
+    
+}
+
+// Called any time the ICEGatheringState changes.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection iceGatheringChanged:(RTCICEGatheringState)newState {
+    
+}
+
+// New Ice candidate have been found.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection gotICECandidate:(RTCICECandidate *)candidate {
+    
+}
+
+// New data channel has been opened.
+- (void)peerConnection:(RTCPeerConnection*)peerConnection didOpenDataChannel:(RTCDataChannel*)dataChannel {
+    
+}
+
+#pragma mark RTCSessionDescriptionDelegate
+
+// Called when creating a session.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection didCreateSessionDescription:(RTCSessionDescription *)sdp error:(NSError *)error {
+    NSLog(@"Did create session description %@",sdp);
+}
+
+// Called when setting a local or remote description.
+- (void)peerConnection:(RTCPeerConnection *)peerConnection didSetSessionDescriptionWithError:(NSError *)error {
+    
+}
+
+
 #pragma mark SRWebSocketDelegate
 
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message {
@@ -61,6 +149,10 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
         return;
     }
     
+    if(control.isInit) {
+        [self handleInit];
+    }
+    
     NSLog(@"Got message %@",control);
 }
 
@@ -75,6 +167,15 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean {
     NSLog(@"Did close %@",reason);
+}
+
+#pragma mark private
+
+- (void) handleInit {
+    RTCDataChannelInit* config = [[RTCDataChannelInit alloc] init];
+    config.isOrdered = false;
+    _dataChannel = [_peerConnection createDataChannelWithLabel:@"sender" config:config];
+    [_peerConnection createOfferWithDelegate:self constraints:nil];
 }
 
 @end

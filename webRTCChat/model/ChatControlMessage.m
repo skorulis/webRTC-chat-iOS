@@ -9,4 +9,8 @@
     return @{};
 }
 
+- (BOOL) isInit {
+    return [_type isEqualToString:CCT_CHAT_INIT];
+}
+
 @end
