@@ -48,4 +48,8 @@
     return [_type isEqualToString:CCT_CHAT_OFFER];
 }
 
+- (BOOL) isIceCandidate {
+    return [_type isEqualToString:CCT_ICE_CANDIDATE];
+}
+
 @end

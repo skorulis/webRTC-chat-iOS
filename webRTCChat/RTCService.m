@@ -113,11 +113,16 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 // New Ice candidate have been found.
 - (void)peerConnection:(RTCPeerConnection *)peerConnection gotICECandidate:(RTCICECandidate *)candidate {
     NSLog(@"Got ice candidate %@",candidate);
+    ICECandidateModel* iceModel = [[ICECandidateModel alloc] initWithICECandidate:candidate];
+    ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:CCT_ICE_CANDIDATE payload:iceModel];
+    [self sendControlMessage:message];
 }
 
 // New data channel has been opened.
 - (void)peerConnection:(RTCPeerConnection*)peerConnection didOpenDataChannel:(RTCDataChannel*)dataChannel {
-    
+    NSLog(@"Opened data channel");
+    _dataChannel = dataChannel;
+    _dataChannel.delegate = self;
 }
 
 #pragma mark RTCSessionDescriptionDelegate
@@ -141,12 +146,12 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
 // Called when the data channel state has changed.
 - (void)channelDidChangeState:(RTCDataChannel*)channel {
-    
+    NSLog(@"Data channel did change state %u",channel.state);
 }
 
 // Called when a data buffer was successfully received.
 - (void)channel:(RTCDataChannel*)channel didReceiveMessageWithBuffer:(RTCDataBuffer*)buffer {
-    
+    NSLog(@"Channel did receive message %@",buffer);
 }
 
 #pragma mark SRWebSocketDelegate
@@ -172,6 +177,9 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     } else if(control.isOffer) {
         SDPModel* sdpModel = [control payloadAs:SDPModel.class];
         [self handleOffer:sdpModel];
+    } else if(control.isIceCandidate) {
+        ICECandidateModel* ice = [control payloadAs:ICECandidateModel.class];
+        [_peerConnection addICECandidate:ice.candidate];
     }
     
     NSLog(@"Got message %@",control);

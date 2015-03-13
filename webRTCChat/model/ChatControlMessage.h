@@ -7,6 +7,7 @@ static NSString* const CCT_CHAT_REQUEST = @"CCT_CHAT_REQUEST";
 static NSString* const CCT_CHAT_INIT = @"CCT_CHAT_INIT";
 static NSString* const CCT_CHAT_OFFER = @"CCT_CHAT_OFFER";
 static NSString* const CCT_CHAT_ANSWER = @"CCT_CHAT_ANSWER";
+static NSString* const CCT_ICE_CANDIDATE = @"CCT_ICE_CANDIDATE";
 
 @interface ChatControlMessage : MTLModel <MTLJSONSerializing>
 
@@ -19,5 +20,6 @@ static NSString* const CCT_CHAT_ANSWER = @"CCT_CHAT_ANSWER";
 
 - (BOOL) isInit;
 - (BOOL) isOffer;
+- (BOOL) isIceCandidate;
 
 @end
