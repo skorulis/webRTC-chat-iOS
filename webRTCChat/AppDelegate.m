@@ -2,8 +2,11 @@
 //  Copyright (c) 2015 com.skorulis. All rights reserved.
 
 #import "AppDelegate.h"
+#import "ChatWindowViewController.h"
 
-@interface AppDelegate ()
+@interface AppDelegate () {
+    RTCService* _rtcService;
+}
 
 @end
 
@@ -11,7 +14,13 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    _rtcService = [[RTCService alloc] init];
+    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window.rootViewController = [[ChatWindowViewController alloc] initWithService:_rtcService];
+    self.window.backgroundColor = [UIColor whiteColor];
+    [self.window makeKeyAndVisible];
+    
     return YES;
 }
 
