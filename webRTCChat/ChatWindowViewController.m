@@ -6,10 +6,12 @@
 #import <FontAwesomeKit/FontAwesomeKit.h>
 #import "UIViewController+KeyboardAnimation.h"
 
-@interface ChatWindowViewController () {
+@interface ChatWindowViewController () <RTCServiceDelegate> {
     UITextView* _chatText;
     UIButton* _sendButton;
+    UIButton* _connectButton;
     RTCService* _service;
+    NSMutableAttributedString* _text;
 }
 
 @property (nonatomic, readonly) MASConstraint* entryBottomConstraint;
@@ -23,6 +25,8 @@
 - (instancetype) initWithService:(RTCService*)service {
     self = [super init];
     _service = service;
+    _service.delegate = self;
+    _text = [[NSMutableAttributedString alloc] init];
     return self;
 }
 
@@ -48,6 +52,7 @@
     [self.view addSubview:_sendButton];
     
     [self buildLayout];
+    [_service connectSocket];
 }
 
 - (void) viewWillAppear:(BOOL)animated {
@@ -86,6 +91,12 @@
     }];
 }
 
+#pragma mark RTCServiceDelegate
+
+- (void) rtcServiceDidConnectSocket:(RTCService*)rtcService {
+    [self appendText:@"connected to server" name:@"System" color:[UIColor yellowColor]];
+}
+
 #pragma mark actions
 
 - (void) sendPressed:(id)sender {
@@ -93,11 +104,14 @@
     if(toSend.length == 0) {
         return;
     }
-    [self appendText:toSend name:@"You"];
+    [self appendText:toSend name:@"You" color:[UIColor blueColor]];
     _entryText.text = nil;
 }
 
-- (void) appendText:(NSString*)text name:(NSString*)name {
-    _chatText.text = [NSString stringWithFormat:@"%@%@ : %@\n",_chatText.text,name,text];
+- (void) appendText:(NSString*)text name:(NSString*)name color:(UIColor*)color {
+    NSString* s = [NSString stringWithFormat:@"%@ : %@\n",name,text];
+    NSAttributedString* att = [[NSAttributedString alloc] initWithString:s attributes:@{NSForegroundColorAttributeName : color, NSFontAttributeName: [UIFont systemFontOfSize:18]}];
+    [_text appendAttributedString:att];
+    _chatText.attributedText = _text;
 }
 @end
