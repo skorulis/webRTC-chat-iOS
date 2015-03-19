@@ -16,7 +16,8 @@
 #import "ICECandidateModel.h"
 
 
-static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
+//static NSString* const kServerAddress = @"ws://192.168.1.2:9000/chat";
+static NSString* const kServerAddress = @"ws://peaceful-hollows-7806.herokuapp.com/chat";
 
 @interface RTCService () <SRWebSocketDelegate, RTCPeerConnectionDelegate, RTCSessionDescriptionDelegate, RTCDataChannelDelegate> {
     SRWebSocket* _webSocket;
@@ -61,6 +62,7 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 - (void) connectToPeer {
     ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:CCT_CHAT_REQUEST payload:nil];
     [self sendControlMessage:message];
+    NSLog(@"Sending chat request");
 }
 
 - (void) disconnectFromPeer {
@@ -77,10 +79,11 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     NSDictionary* json = [MTLJSONAdapter JSONDictionaryFromModel:message];
     NSError* error;
     NSData* data = [NSJSONSerialization dataWithJSONObject:json options:0 error:&error];
-    if(error || !data) {
+    NSString* jsonText = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if(error || !data || !jsonText) {
         NSLog(@"Error sending control message %@",message);
     } else {
-        [_webSocket send:data];
+        [_webSocket send:jsonText];
     }
 }
 
@@ -118,9 +121,10 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
 // New Ice candidate have been found.
 - (void)peerConnection:(RTCPeerConnection *)peerConnection gotICECandidate:(RTCICECandidate *)candidate {
-    NSLog(@"Got ice candidate %@",candidate);
     ICECandidateModel* iceModel = [[ICECandidateModel alloc] initWithICECandidate:candidate];
     ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:CCT_ICE_CANDIDATE payload:iceModel];
+    NSLog(@"Sending ice candidate %@",candidate);
+    [_delegate rtcServiceDidSendIceMessage:self];
     [self sendControlMessage:message];
 }
 
@@ -135,11 +139,16 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
 
 // Called when creating a session.
 - (void)peerConnection:(RTCPeerConnection *)peerConnection didCreateSessionDescription:(RTCSessionDescription *)sdp error:(NSError *)error {
-    NSLog(@"Did create session description %@",sdp);
     [_peerConnection setLocalDescriptionWithDelegate:self sessionDescription:sdp];
     SDPModel* sdpModel = [[SDPModel alloc] initWithSDP:sdp];
     NSString* messageType = _didInitiate ? CCT_CHAT_OFFER : CCT_CHAT_ANSWER;
     ChatControlMessage* message = [[ChatControlMessage alloc] initWithType:messageType payload:sdpModel];
+    NSLog(@"Sending SDP %@",message);
+    if(_didInitiate) {
+        [_delegate rtcServiceDidSendOffer:self];
+    } else {
+        [_delegate rtcServiceDidSendAnswer:self];
+    }
     [self sendControlMessage:message];
 }
 
@@ -199,6 +208,7 @@ static NSString* const kServerAddress = @"ws://192.168.1.2:8123";
     } else if(control.isIceCandidate) {
         ICECandidateModel* ice = [control payloadAs:ICECandidateModel.class];
         [_peerConnection addICECandidate:ice.candidate];
+        [_delegate rtcServiceDidReceiveIceMessage:self];
     }
     
     NSLog(@"Got message %@",control);

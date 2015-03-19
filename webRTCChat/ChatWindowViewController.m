@@ -106,6 +106,30 @@
 
 #pragma mark RTCServiceDelegate
 
+- (void) rtcServiceDidSendIceMessage:(RTCService*)rtcService {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self appendText:@"sent ice candidate" name:@"System" color:[UIColor yellowColor]];
+    });
+}
+
+- (void) rtcServiceDidReceiveIceMessage:(RTCService*)rtcService {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self appendText:@"received ice candidate" name:@"System" color:[UIColor yellowColor]];
+    });
+}
+
+- (void) rtcServiceDidSendOffer:(RTCService*)rtcService {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self appendText:@"sent chat offer" name:@"System" color:[UIColor yellowColor]];
+    });
+}
+
+- (void) rtcServiceDidSendAnswer:(RTCService*)rtcService {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self appendText:@"sent chat answer" name:@"System" color:[UIColor yellowColor]];
+    });
+}
+
 - (void) rtcServiceDidConnectSocket:(RTCService*)rtcService {
     [self appendText:@"connected to server" name:@"System" color:[UIColor yellowColor]];
     _connectButton.enabled = true;

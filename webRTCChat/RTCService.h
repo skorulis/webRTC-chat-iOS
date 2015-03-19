@@ -7,6 +7,10 @@
 
 @protocol RTCServiceDelegate <NSObject>
 
+- (void) rtcServiceDidSendIceMessage:(RTCService*)rtcService;
+- (void) rtcServiceDidReceiveIceMessage:(RTCService*)rtcService;
+- (void) rtcServiceDidSendOffer:(RTCService*)rtcService;
+- (void) rtcServiceDidSendAnswer:(RTCService*)rtcService;
 - (void) rtcServiceDidConnectSocket:(RTCService*)rtcService;
 - (void) rtcServiceDidConnectChannel:(RTCService*)rtcService;
 - (void) rtcService:(RTCService*)rtcService didReceiveText:(NSString*)text;
