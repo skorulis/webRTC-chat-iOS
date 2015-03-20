@@ -34,14 +34,16 @@ static NSString* const kServerAddress = @"ws://peaceful-hollows-7806.herokuapp.c
 
 - (void) connectSocket {
     NSMutableArray* stunServers = [[NSMutableArray alloc] init];;
-    NSArray* stunServerURLStrings = @[@"stun1.voiceeclipse.net",@"stun.l.google.com:19302",@"stun3.l.google.com:19302"];
+    NSArray* stunServerURLStrings = @[@"stun3.l.google.com:19302",@"stun:stunserver.org",@"stun.xten.com"];
     for(NSString* s in stunServerURLStrings) {
-        NSURL* url = [NSURL URLWithString:s];
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"stun:%@",s]];
         NSParameterAssert(url);
         RTCICEServer* server = [[RTCICEServer alloc] initWithURI:url username:@"" password:@""];
         NSParameterAssert(server);
         [stunServers addObject:server];
     }
+    //RTCICEServer* turnServer = [[RTCICEServer alloc] initWithURI:[NSURL URLWithString:@"turn:numb.viagenie.ca"] username:@"webrtc@live.com" password:@"muazkh"];
+    //[stunServers addObject:turnServer];
     
     _stunServers = stunServers.copy;
     [RTCPeerConnectionFactory initializeSSL];
@@ -207,7 +209,8 @@ static NSString* const kServerAddress = @"ws://peaceful-hollows-7806.herokuapp.c
         [self handleAnswer:sdpModel];
     } else if(control.isIceCandidate) {
         ICECandidateModel* ice = [control payloadAs:ICECandidateModel.class];
-        [_peerConnection addICECandidate:ice.candidate];
+        BOOL wasAdded = [_peerConnection addICECandidate:ice.candidate];
+        NSLog(@"ICE candidate was added %d",wasAdded);
         [_delegate rtcServiceDidReceiveIceMessage:self];
     }
     
